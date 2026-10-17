@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Scientific Calculator</title>
+  <style>
+    :root {
+      --bg-color: #121212;
+      --calc-bg: #1e1e1e;
+      --display-bg: #2a2a2a;
+      --text-color: #ffffff;
+      --subtext-color: #a0a0a0;
+      --btn-bg: #333333;
+      --btn-hover: #444444;
+      --btn-op-bg: #ff9500;
+      --btn-op-hover: #ffaa33;
+      --btn-sci-bg: #282828;
+      --btn-sci-hover: #383838;
+      --btn-danger-bg: #d9534f;
+      --btn-danger-hover: #e06d6a;
+    }
+
+    [data-theme="light"] {
+      --bg-color: #f0f2f5;
+      --calc-bg: #ffffff;
+      --display-bg: #f8f9fa;
+      --text-color: #212529;
+      --subtext-color: #6c757d;
+      --btn-bg: #e9ecef;
+      --btn-hover: #dee2e6;
+      --btn-op-bg: #007bff;
+      --btn-op-hover: #0069d9;
+      --btn-sci-bg: #dee2e6;
+      --btn-sci-hover: #ced4da;
+      --btn-danger-bg: #dc3545;
+      --btn-danger-hover: #c82333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    .app-container {
+      display: flex;
+      gap: 20px;
+      background-color: var(--calc-bg);
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      max-width: 850px;
+      width: 100%;
+    }
+
+    .calculator {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .theme-btn {
+      background: var(--btn-sci-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .display {
+      background-color: var(--display-bg);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 110px;
+      word-wrap: break-word;
+      word-break: break-all;
+    }
+
+    .expression {
+      color: var(--subtext-color);
+      font-size: 1rem;
+      min-height: 24px;
+    }
+
+    .current-val {
+      font-size: 2.4rem;
+      font-weight: bold;
+    }
+
+    .keypad {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    button.key {
+      padding: 18px 10px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      background-color: var(--btn-bg);
+      color: var(--text-color);
+      cursor: pointer;
+      transition: background-color 0.15s ease, transform 0.05s ease;
+      user-select: none;
+    }
+
+    button.key:active {
+      transform: scale(0.96);
+    }
+
+    button.key:hover {
+      background-color: var(--btn-hover);
+    }
+
+    button.key.sci {
+      background-color: var(--btn-sci-bg);
+      font-size: 0.95rem;
+    }
+
+    button.key.sci:hover {
+      background-color: var(--btn-sci-hover);
+    }
+
+    button.key.op {
+      background-color: var(--btn-op-bg);
+      color: #ffffff;
+      font-weight: bold;
+    }
+
+    button.key.op:hover {
+      background-color: var(--btn-op-hover);
+    }
+
+    button.key.danger {
+      background-color: var(--btn-danger-bg);
+      color: #ffffff;
+    }
+
+    button.key.danger:hover {
+      background-color: var(--btn-danger-hover);
+    }
+
+    .history-panel {
+      flex: 1;
+      background-color: var(--display-bg);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      max-height: 520px;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--btn-bg);
+    }
+
+    .history-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-item {
+      padding: 8px;
+      border-radius: 6px;
+      background-color: var(--calc-bg);
+      text-align: right;
+      cursor: pointer;
+    }
+
+    .history-item .hist-exp {
+      font-size: 0.85rem;
+      color: var(--subtext-color);
+    }
+
+    .history-item .hist-res {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    @media (max-width: 700px) {
+      .app-container {
+        flex-direction: column;
+      }
+      .history-panel {
+        max-height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <div class="calculator">
+      <div class="header-bar">
+        <h3>Scientific Calculator</h3>
+        <button class="theme-btn" id="themeToggle">Toggle Theme</button>
+      </div>
+
+      <div class="display">
+        <div class="expression" id="expressionDisplay"></div>
+        <div class="current-val" id="valueDisplay">0</div>
+      </div>
+
+      <div class="keypad">
+        <!-- Row 1 -->
+        <button class="key sci" data-action="sin">sin</button>
+        <button class="key sci" data-action="cos">cos</button>
+        <button class="key sci" data-action="tan">tan</button>
+        <button class="key danger" data-action="clear">AC</button>
+        <button class="key sci" data-action="backspace">⌫</button>
+
+        <!-- Row 2 -->
+        <button class="key sci" data-action="log">log</button>
+        <button class="key sci" data-action="ln">ln</button>
+        <button class="key sci" data-val="(">(</button>
+        <button class="key sci" data-val=")">)</button>
+        <button class="key op" data-val="/">÷</button>
+
+        <!-- Row 3 -->
+        <button class="key sci" data-action="sqrt">√</button>
+        <button class="key" data-val="7">7</button>
+        <button class="key" data-val="8">8</button>
+        <button class="key" data-val="9">9</button>
+        <button class="key op" data-val="*">×</button>
+
+        <!-- Row 4 -->
+        <button class="key sci" data-val="**">x^y</button>
+        <button class="key" data-val="4">4</button>
+        <button class="key" data-val="5">5</button>
+        <button class="key" data-val="6">6</button>
+        <button class="key op" data-val="-">−</button>
+
+        <!-- Row 5 -->
+        <button class="key sci" data-action="pi">π</button>
+        <button class="key" data-val="1">1</button>
+        <button class="key" data-val="2">2</button>
+        <button class="key" data-val="3">3</button>
+        <button class="key op" data-val="+">+</button>
+
+        <!-- Row 6 -->
+        <button class="key sci" data-action="e">e</button>
+        <button class="key sci" data-action="negate">±</button>
+        <button class="key" data-val="0">0</button>
+        <button class="key" data-val=".">.</button>
+        <button class="key op" data-action="calculate">=</button>
+      </div>
+    </div>
+
+    <div class="history-panel">
+      <div class="history-header">
+        <span>History</span>
+        <button class="theme-btn" id="clearHistory">Clear</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+
+  <script>
+    const expressionDisplay = document.getElementById('expressionDisplay');
+    const valueDisplay = document.getElementById('valueDisplay');
+    const historyList = document.getElementById('historyList');
+    const themeToggle = document.getElementById('themeToggle');
+    const clearHistoryBtn = document.getElementById('clearHistory');
+
+    let currentInput = '0';
+    let expression = '';
+    let shouldResetDisplay = false;
+
+    function updateDisplay() {
+      valueDisplay.textContent = currentInput;
+      expressionDisplay.textContent = expression;
+    }
+
+    function appendValue(val) {
+      if (currentInput === '0' || shouldResetDisplay) {
+        currentInput = val;
+        shouldResetDisplay = false;
+      } else {
+        currentInput += val;
+      }
+      updateDisplay();
+    }
+
+    function applyFunction(func) {
+      const num = parseFloat(currentInput);
+      if (isNaN(num)) return;
+      let result = 0;
+
+      switch (func) {
+        case 'sin': result = Math.sin(num); break;
+        case 'cos': result = Math.cos(num); break;
+        case 'tan': result = Math.tan(num); break;
+        case 'log': result = Math.log10(num); break;
+        case 'ln': result = Math.log(num); break;
+        case 'sqrt': result = Math.sqrt(num); break;
+      }
+
+      addHistory(`${func}(${num})`, result);
+      currentInput = String(Number(result.toFixed(8)));
+      shouldResetDisplay = true;
+      updateDisplay();
+    }
+
+    function calculate() {
+      const fullExp = expression + currentInput;
+      try {
+        // Safe evaluation for basic arithmetic expressions
+        const sanitized = fullExp.replace(/[^-()\d/*+.]/g, '');
+        const result = Function(`"use strict"; return (${sanitized})`)();
+        const formatted = String(Number(result.toFixed(8)));
+
+        addHistory(fullExp, formatted);
+        expression = '';
+        currentInput = formatted;
+        shouldResetDisplay = true;
+        updateDisplay();
+      } catch (err) {
+        currentInput = 'Error';
+        shouldResetDisplay = true;
+        updateDisplay();
+      }
+    }
+
+    function addHistory(exp, res) {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <div class="hist-exp">${exp} =</div>
+        <div class="hist-res">${res}</div>
+      `;
+      item.addEventListener('click', () => {
+        currentInput = String(res);
+        updateDisplay();
+      });
+      historyList.prepend(item);
+    }
+
+    document.querySelector('.keypad').addEventListener('click', (e) => {
+      const btn = e.target.closest('button.key');
+      if (!btn) return;
+
+      const val = btn.dataset.val;
+      const action = btn.dataset.action;
+
+      if (val !== undefined) {
+        if (['+', '-', '*', '/', '**'].includes(val)) {
+          expression += `${currentInput} ${val} `;
+          shouldResetDisplay = true;
+          updateDisplay();
+        } else {
+          appendValue(val);
+        }
+      } else if (action) {
+        switch (action) {
+          case 'clear':
+            currentInput = '0';
+            expression = '';
+            updateDisplay();
+            break;
+          case 'backspace':
+            currentInput = currentInput.length > 1 ? currentInput.slice(0, -1) : '0';
+            updateDisplay();
+            break;
+          case 'negate':
+            currentInput = String(parseFloat(currentInput) * -1);
+            updateDisplay();
+            break;
+          case 'pi':
+            currentInput = String(Math.PI.toFixed(8));
+            updateDisplay();
+            break;
+          case 'e':
+            currentInput = String(Math.E.toFixed(8));
+            updateDisplay();
+            break;
+          case 'calculate':
+            calculate();
+            break;
+          default:
+            applyFunction(action);
+        }
+      }
+    });
+
+    themeToggle.addEventListener('click', () => {
+      const root = document.documentElement;
+      if (root.getAttribute('data-theme') === 'light') {
+        root.removeAttribute('data-theme');
+      } else {
+        root.setAttribute('data-theme', 'light');
+      }
+    });
+
+    clearHistoryBtn.addEventListener('click', () => {
+      historyList.innerHTML = '';
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.key >= '0' && e.key <= '9') || e.key === '.') {
+        appendValue(e.key);
+      } else if (['+', '-', '*', '/'].includes(e.key)) {
+        expression += `${currentInput} ${e.key} `;
+        shouldResetDisplay = true;
+        updateDisplay();
+      } else if (e.key === 'Enter' || e.key === '=') {
+        e.preventDefault();
+        calculate();
+      } else if (e.key === 'Backspace') {
+        currentInput = currentInput.length > 1 ? currentInput.slice(0, -1) : '0';
+        updateDisplay();
+      } else if (e.key === 'Escape') {
+        currentInput = '0';
+        expression = '';
+        updateDisplay();
+      }
+    });
+  </script>
+</body>
+</html>
